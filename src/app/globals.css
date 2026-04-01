@@ -1,0 +1,105 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    /* Font Mapping */
+    --font-sans: var(--pt-font-sans);
+    --font-heading: var(--pt-font-sans);
+
+    /* Shadcn UI Mapping to Project Tokens */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    /* Custom Status Colors from Design Tokens */
+    --color-success: #10b981;
+    --color-success-foreground: #ffffff;
+    --color-warning: #f59e0b;
+    --color-warning-foreground: #ffffff;
+
+    /* Radius Scale ตามที่ทีมกำหนด (24px สำหรับ card) */
+    --radius-xl: 1.5rem;
+    --radius-lg: 1rem;
+    --radius-md: 0.75rem;
+    --radius-sm: 0.5rem;
+}
+
+:root {
+    /* Neutrals & Surfaces */
+    --background: #f8fafc; /* --pt-color-neutral-50 */
+    --foreground: #0f172a; /* --pt-color-neutral-900 */
+    --card: #ffffff;
+    --card-foreground: #334155; /* --pt-color-neutral-700 */
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
+
+    /* Brand Colors (CPAC Blue) */
+    --primary: #2563eb; /* --pt-color-primary-600 */
+    --primary-foreground: #ffffff;
+    --secondary: #f1f5f9; /* --pt-color-neutral-100 */
+    --secondary-foreground: #1d4ed8;
+
+    /* Borders & Inputs */
+    --border: #e2e8f0; /* --pt-color-neutral-200 */
+    --input: #cbd5e1;  /* --pt-color-neutral-300 */
+    --ring: #3b82f6;
+
+    /* Feedback States */
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --accent: #eff6ff;
+    --accent-foreground: #2563eb;
+    --destructive: #f43f5e;
+    --destructive-foreground: #ffffff;
+
+    /* Font Variable */
+    --pt-font-sans: "IBM Plex Sans Thai", "IBM Plex Sans", sans-serif;
+
+    /* Sidebar Context */
+    --sidebar: #ffffff;
+    --sidebar-foreground: #334155;
+    --sidebar-primary: #2563eb;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f1f5f9;
+    --sidebar-accent-foreground: #2563eb;
+    --sidebar-border: #e2e8f0;
+    --sidebar-ring: #3b82f6;
+}
+
+.dark {
+    --background: #020617;
+    --foreground: #f8fafc;
+    --card: #0f172a;
+    --card-foreground: #f8fafc;
+    --primary: #3b82f6;
+    --border: #1e293b;
+    --input: #1e293b;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground font-sans antialiased;
+    }
+}
