@@ -1,6 +1,3 @@
-// app/page.tsx
-// หน้าแรกต้อง "ว่าง" ตามที่คุณต้องการ
-
 export default function HomePage() {
   return (
     <main className="min-h-[calc(100vh-64px)] bg-pt-neutral-50 flex items-center justify-center">
