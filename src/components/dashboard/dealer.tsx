@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Download } from "lucide-react";
+import { Download, ChevronDown, SlidersHorizontal } from "lucide-react";
 
 import { DashboardService } from "@/services/dashboard";
 import {
@@ -122,14 +122,14 @@ function StatCard({
 }) {
   return (
     <div
-      className={`bg-white border border-pt-neutral-200 border-l-4 ${accentClass} rounded-[24px] px-4 py-3.5`}
+      className={`bg-white border border-pt-neutral-200 border-l-4 ${accentClass} rounded-[20px] sm:rounded-[24px] px-3 py-2.5 sm:px-4 sm:py-3.5`}
       style={{ boxShadow: "var(--pt-shadow-sm)" }}
     >
-      <p className="text-[10px] font-bold text-pt-neutral-500 uppercase tracking-widest mb-1.5">
+      <p className="text-[9px] sm:text-[10px] font-bold text-pt-neutral-500 uppercase tracking-widest mb-1 leading-tight">
         {label}
       </p>
       <div className="flex items-baseline gap-2">
-        <span className="text-[26px] font-bold text-pt-neutral-900 leading-none font-mono">
+        <span className="text-[22px] sm:text-[26px] font-bold text-pt-neutral-900 leading-none font-mono">
           {value}
         </span>
         <span className="text-[11px] text-pt-neutral-500 font-medium">{sub}</span>
@@ -146,7 +146,7 @@ function FilterGroup({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 w-full sm:w-auto">
       <label className="text-[10px] font-semibold text-pt-neutral-500 uppercase tracking-wider">
         {label}
       </label>
@@ -158,7 +158,77 @@ function FilterGroup({
 // FlatOrderRow สำหรับ dealer — ไม่มี dealerId/dealerName (Dealer view ข้อมูลตัวเอง)
 type FlatOrderRow = DialogOrderRow;
 
-
+// ── MobileOrderCard ─────────────────────────────────────────────────────────
+function MobileOrderCard({
+  row,
+  onOpenDetail,
+}: {
+  row: FlatOrderRow;
+  onOpenDetail: (row: FlatOrderRow) => void;
+}) {
+  const sent = sumDelivered(row.order);
+  const rem = Math.max(row.order.totalQty - sent, 0);
+  return (
+    <div className="px-4 py-3 space-y-2">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          {row.order.updateTime && row.order.updateTime !== "-" ? (
+            <span className="font-mono text-[11px] font-medium text-pt-neutral-600 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-pt-success-500 animate-pulse shrink-0" />
+              {row.order.updateTime}
+            </span>
+          ) : <span className="text-[11px] text-pt-neutral-400">—</span>}
+        </div>
+        <div className="text-right shrink-0">
+          <p className="font-mono font-semibold text-[12px] text-pt-primary-700">{row.site.siteCode}</p>
+          <p className="text-[10px] text-pt-neutral-400 line-clamp-1 max-w-[140px] text-right">{row.site.siteName}</p>
+        </div>
+      </div>
+      <div className="bg-pt-neutral-50 rounded-[12px] px-3 py-2">
+        <p className="font-semibold text-[12px] text-pt-neutral-900 leading-tight">{row.customer.companyName}</p>
+        <p className="text-[10px] text-pt-neutral-500 mt-0.5">{row.customer.id} · {row.customer.phone}</p>
+        <p className="text-[10px] text-pt-neutral-400">Line: {row.customer.contactLine}</p>
+      </div>
+      <div className="flex items-end justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-[11px] text-pt-neutral-700 line-clamp-2">{row.order.product}</p>
+          <p className="text-[10px] font-mono text-pt-neutral-400">{row.order.orderId}</p>
+          {row.order.schedDate && (
+            <p className="text-[10px] text-pt-neutral-500 mt-0.5">
+              เท: {row.order.schedDate}{row.order.schedTime ? ` ${row.order.schedTime}` : ""}
+            </p>
+          )}
+        </div>
+        <div className="text-right shrink-0">
+          <p className="font-mono text-[12px] font-semibold text-pt-neutral-700">
+            {row.order.totalQty.toLocaleString()} <span className="text-[9px] text-pt-neutral-400">คิว</span>
+          </p>
+          <p className={`font-mono text-[11px] font-semibold ${sent > 0 ? "text-pt-primary-600" : "text-pt-neutral-300"}`}>
+            ส่งแล้ว {sent.toLocaleString()}
+          </p>
+          <p className={`font-mono text-[11px] font-bold ${rem === 0 ? "text-pt-success-600" : row.order.status === "ยกเลิกรายการ" ? "text-pt-neutral-400 line-through" : "text-pt-neutral-900"}`}>
+            คงเหลือ {rem.toLocaleString()}
+          </p>
+          <MiniProgress sent={sent} total={row.order.totalQty} status={row.order.status} />
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-2 pt-0.5">
+        <div className="flex flex-wrap gap-1 flex-1 min-w-0">
+          <StatusBadge status={row.order.status} />
+          <DPBadge status={row.order.dpStatus} plant={row.order.dpPlant} />
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-7 px-3 rounded-[10px] text-[11px] border-pt-neutral-300 hover:bg-pt-primary-50 hover:border-pt-primary-400 hover:text-pt-primary-700 shrink-0"
+          onClick={() => onOpenDetail(row)}
+        >
+          ดูรายละเอียด
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function FlatOrderTableRow({
   row,
@@ -288,6 +358,8 @@ export default function DealerDashboard({
   const [dateTimeNow, setDateTimeNow] = useState(formatNow(new Date()));
   const [detailRow, setDetailRow] = useState<FlatOrderRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  const [filterCollapsed, setFilterCollapsed] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setDateTimeNow(formatNow(new Date())), 1000);
@@ -382,34 +454,44 @@ export default function DealerDashboard({
   return (
     <div className="flex flex-col h-screen bg-background">
       <div
-        className="px-6 pt-5 pb-4 bg-white border-b border-pt-neutral-200 shrink-0"
+        className="bg-white border-b border-pt-neutral-200 shrink-0"
         style={{ boxShadow: "var(--pt-shadow-sm)" }}
       >
-        <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
-          <div>
-            <h1 className="text-[18px] font-bold text-pt-neutral-900 leading-tight">
+        {/* ── Title bar — always visible ── */}
+        <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-[15px] sm:text-[18px] font-bold text-pt-neutral-900 leading-tight">
               Dashboard ติดตามคำสั่งจอง EBooking — งานจองคอนกรีต
             </h1>
-            <p className="text-[12px] text-pt-neutral-500 mt-0.5">
+            <p className="text-[11px] sm:text-[12px] text-pt-neutral-500 mt-0.5">
               Dealer: <span className="font-semibold text-pt-neutral-900">{dealerName}</span>
               <span className="ml-2 text-pt-neutral-400">({dealerId})</span>
             </p>
-            <p className="text-[12px] text-pt-neutral-500 mt-0.5">
-              อัปเดตล่าสุด {dateTimeNow}
-            </p>
+            <p className="text-[11px] sm:text-[12px] text-pt-neutral-500">อัปเดตล่าสุด {dateTimeNow}</p>
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 text-[12px] rounded-[16px] bg-white border-pt-neutral-200 text-pt-neutral-700 hover:bg-pt-primary-50 hover:border-pt-primary-300 hover:text-pt-primary-600"
-            style={{ boxShadow: "var(--pt-shadow-xs)" }}
-          >
-            <Download size={14} /> Export Excel
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-[12px] rounded-[16px] bg-white border-pt-neutral-200 text-pt-neutral-700 hover:bg-pt-primary-50 hover:border-pt-primary-300 hover:text-pt-primary-600 hidden sm:flex"
+              style={{ boxShadow: "var(--pt-shadow-xs)" }}
+            >
+              <Download size={14} /> Export Excel
+            </Button>
+            <button
+              type="button"
+              onClick={() => setHeaderCollapsed((v) => !v)}
+              className="sm:hidden flex items-center gap-1 text-[11px] text-pt-neutral-500 border border-pt-neutral-200 rounded-full px-2.5 py-1 bg-white"
+            >
+              {headerCollapsed ? "สถิติ" : "ซ่อน"}
+              <ChevronDown size={12} className={`transition-transform duration-200 ${headerCollapsed ? "" : "rotate-180"}`} />
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+        {/* ── Stat cards — collapsible on mobile ── */}
+        <div className={`px-4 sm:px-6 pb-3 sm:pb-4 sm:block ${headerCollapsed ? "hidden" : "block"}`}>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2 sm:gap-3">
           <StatCard
             label="Dealer"
             value={dealerId}
@@ -447,14 +529,30 @@ export default function DealerDashboard({
             accentClass="border-l-pt-error-600"
           />
         </div>
+        </div>
       </div>
 
-      <div className="px-6 py-3 bg-white border-b border-pt-neutral-200 shrink-0">
-        <div className="flex flex-wrap gap-2.5 items-end">
+      {/* ── Filter bar — collapsible on mobile ── */}
+      <div className="bg-white border-b border-pt-neutral-200 shrink-0">
+        <div className="px-4 sm:px-6 py-2 sm:py-0 flex items-center justify-between sm:hidden">
+          <span className="text-[11px] font-semibold text-pt-neutral-500 uppercase tracking-wider flex items-center gap-1.5">
+            <SlidersHorizontal size={12} /> ตัวกรอง
+          </span>
+          <button
+            type="button"
+            onClick={() => setFilterCollapsed((v) => !v)}
+            className="flex items-center gap-1 text-[11px] text-pt-neutral-500 border border-pt-neutral-200 rounded-full px-2.5 py-1 bg-white"
+          >
+            {filterCollapsed ? "แสดง" : "ซ่อน"}
+            <ChevronDown size={12} className={`transition-transform duration-200 ${filterCollapsed ? "" : "rotate-180"}`} />
+          </button>
+        </div>
+        <div className={`px-4 sm:px-6 py-3 sm:block ${filterCollapsed ? "hidden" : "block"}`}>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-2.5 items-end">
           <FilterGroup label="ลูกค้า / Line">
             <Input
               placeholder="ชื่อลูกค้า, Line ID..."
-              className="h-9 text-[12px] w-52 rounded-[16px] border-pt-neutral-300 placeholder:text-pt-neutral-400 focus:border-pt-primary-500 focus:ring-0"
+              className="h-9 text-[12px] w-full sm:w-52 rounded-[16px] border-pt-neutral-300 placeholder:text-pt-neutral-400 focus:border-pt-primary-500 focus:ring-0"
               style={{ boxShadow: "var(--pt-shadow-xs)" }}
               value={draft.searchCust}
               onChange={(e) => updateDraft("searchCust", e.target.value)}
@@ -464,7 +562,7 @@ export default function DealerDashboard({
           <FilterGroup label="Site code">
             <Input
               placeholder="รหัส Site code"
-              className="h-9 text-[12px] w-40 rounded-[16px] border-pt-neutral-300 placeholder:text-pt-neutral-400 focus:border-pt-primary-500 focus:ring-0"
+              className="h-9 text-[12px] w-full sm:w-40 rounded-[16px] border-pt-neutral-300 placeholder:text-pt-neutral-400 focus:border-pt-primary-500 focus:ring-0"
               style={{ boxShadow: "var(--pt-shadow-xs)" }}
               value={draft.searchSite}
               onChange={(e) => updateDraft("searchSite", e.target.value)}
@@ -474,7 +572,7 @@ export default function DealerDashboard({
           <FilterGroup label="วันเท">
             <Input
               type="date"
-              className="h-9 text-[12px] w-40 rounded-[16px] border-pt-neutral-300 focus:border-pt-primary-500 focus:ring-0"
+              className="h-9 text-[12px] w-full sm:w-40 rounded-[16px] border-pt-neutral-300 focus:border-pt-primary-500 focus:ring-0"
               style={{ boxShadow: "var(--pt-shadow-xs)" }}
               value={draft.pourDate}
               onChange={(e) => updateDraft("pourDate", e.target.value)}
@@ -484,7 +582,7 @@ export default function DealerDashboard({
           <FilterGroup label="เวลาเท">
             <Input
               type="time"
-              className="h-9 text-[12px] w-32 rounded-[16px] border-pt-neutral-300 focus:border-pt-primary-500 focus:ring-0"
+              className="h-9 text-[12px] w-full sm:w-32 rounded-[16px] border-pt-neutral-300 focus:border-pt-primary-500 focus:ring-0"
               style={{ boxShadow: "var(--pt-shadow-xs)" }}
               value={draft.pourTime}
               onChange={(e) => updateDraft("pourTime", e.target.value)}
@@ -494,7 +592,7 @@ export default function DealerDashboard({
           <FilterGroup label="สถานะงาน">
             <Select value={draft.status} onValueChange={(v) => updateDraft("status", v)}>
               <SelectTrigger
-                className="h-9 text-[12px] w-44 rounded-[16px] border-pt-neutral-300"
+                className="h-9 text-[12px] w-full sm:w-44 rounded-[16px] border-pt-neutral-300"
                 style={{ boxShadow: "var(--pt-shadow-xs)" }}
               >
                 <SelectValue placeholder="ทั้งหมด" />
@@ -527,7 +625,7 @@ export default function DealerDashboard({
             </Select>
           </FilterGroup>
 
-          <div className="flex gap-2 self-end">
+          <div className="flex gap-2 col-span-2 sm:col-span-1 sm:self-end">
             <Button
               size="sm"
               className="h-9 px-5 rounded-[16px] text-[12px] font-semibold bg-pt-neutral-900 text-white hover:bg-pt-neutral-800"
@@ -546,14 +644,15 @@ export default function DealerDashboard({
             </Button>
           </div>
         </div>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-5">
+      <div className="flex-1 overflow-auto p-3 sm:p-5">
         <div
-          className="bg-white rounded-[24px] border border-pt-neutral-200 overflow-hidden"
+          className="bg-white rounded-[20px] sm:rounded-[24px] border border-pt-neutral-200 overflow-hidden"
           style={{ boxShadow: "var(--pt-shadow-sm)" }}
         >
-          <div className="flex items-center justify-between px-4 py-2 bg-pt-neutral-50 border-b border-pt-neutral-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-2 bg-pt-neutral-50 border-b border-pt-neutral-200 gap-0.5">
             <p className="text-[12px] text-pt-neutral-500">
               แสดง <strong className="text-pt-neutral-900">{totalOrders}</strong> รายการ
               {flatRows.length > 0 && (
@@ -567,7 +666,27 @@ export default function DealerDashboard({
             </p>
           </div>
 
-          <div>
+          {/* Mobile card layout */}
+          <div className="block sm:hidden divide-y divide-pt-neutral-100">
+            {paginated.length > 0 ? (
+              paginated.map((row) => (
+                <MobileOrderCard
+                  key={`${row.customer.id}-${row.site.siteCode}-${row.order.orderId}`}
+                  row={row}
+                  onOpenDetail={openDetail}
+                />
+              ))
+            ) : (
+              <div className="h-32 flex flex-col items-center justify-center">
+                <p className="text-2xl mb-2">🔍</p>
+                <p className="text-[14px] font-medium text-pt-neutral-500">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</p>
+                <p className="text-[12px] text-pt-neutral-400 mt-1">ลองปรับตัวกรองแล้วค้นหาใหม่</p>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop table layout */}
+          <div className="hidden sm:block">
             <Table className="table-auto w-full">
               <TableHeader>
                 <TableRow className="bg-pt-neutral-100 hover:bg-pt-neutral-100 border-b-2 border-pt-neutral-200">
@@ -609,13 +728,13 @@ export default function DealerDashboard({
           </div>
 
           {flatRows.length > 0 && (
-            <div className="flex items-center gap-4 px-4 py-3 border-t border-pt-neutral-200 bg-white">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 py-3 border-t border-pt-neutral-200 bg-white">
               <p className="text-[11px] text-pt-neutral-400 shrink-0">
                 หน้า <strong className="text-pt-neutral-700">{page}</strong> จาก{" "}
                 <strong className="text-pt-neutral-700">{totalPages}</strong> · {flatRows.length} รายการทั้งหมด
               </p>
 
-              <Pagination className="justify-end">
+              <Pagination className="justify-start sm:justify-end">
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
