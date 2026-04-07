@@ -3,118 +3,105 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  ChevronDown,
-  ChevronRight,
-  Search,
-  Bell,
-  UserCircle,
-} from "lucide-react";
-import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { cn } from "@/lib/utils";
 
 export function Navbar() {
   return (
-    <header className="w-full bg-background border-b border-border sticky top-0 z-50 px-8 py-3 flex items-center justify-between shadow-sm">
-      {/* ส่วนโลโก้และเมนูหลัก */}
+    <header className="w-full bg-white border-b border-pt-neutral-200 sticky top-0 z-50 px-8 py-3 flex items-center justify-between shadow-sm">
       <div className="flex items-center gap-10">
-        {/* <Link
-          href="/"
-          className="bg-primary text-primary-foreground font-black px-4 py-1.5 rounded-sm text-2xl tracking-tighter transition hover:opacity-90"
-        >
-          CPAC
-        </Link> */}
+        {/* Logo Section */}
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="bg-[#00BDF8] text-white font-bold px-3 py-1 rounded-md text-xl tracking-tighter transition-transform group-hover:scale-105">
+            CPAC
+          </div>
+          <span className="text-[14px] font-bold text-pt-neutral-800">
+            Project Tracking
+          </span>
+        </Link>
 
-        <NavigationMenu className="hidden lg:flex">
-          <NavigationMenuList className="gap-2">
+        {/* Navigation Section */}
+        <NavigationMenu className="hidden lg:flex" viewport={false}>
+          <NavigationMenuList>
+            {/* หน้าหลัก */}
             <NavigationMenuItem>
-                <NavigationMenuLink className="text-[15px] font-medium text-muted-foreground hover:text-primary cursor-pointer px-4">
-                หน้าหลัก
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/"
+                  className="h-10 px-4 py-2 text-[15px] font-medium text-pt-neutral-500 hover:text-pt-primary-600 transition-colors inline-flex items-center cursor-pointer"
+                >
+                  หน้าหลัก
+                </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
 
+            {/* Dashboard */}
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="text-[15px] font-medium text-muted-foreground hover:text-primary bg-transparent">
-                Dashboard
-              </NavigationMenuTrigger>
-              {/* <NavigationMenuContent>
-                <ul className="w-64 bg-card shadow-2xl rounded-pt-xl border border-border py-1">
-                  <ListItem title="คอนกรีตผสมเสร็จ" />
-                  <ListItem title="คอนกรีตสำเร็จรูป" />
-                  <ListItem title="บริการงานคอนกรีต" />
-                  <ListItem title="บริการงานโครงสร้าง" />
+              <NavigationMenuTrigger>Dashboard</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-full gap-1 p-2">
+                  <ListItem title="ติดตามคำสั่งจอง E-Booking - Company" href="/dashboard/company" />
+                  <ListItem title="ติดตามคำสั่งจอง E-Booking - Dealer" href="/dashboard/dealer" />
                 </ul>
-              </NavigationMenuContent> */}
+              </NavigationMenuContent>
             </NavigationMenuItem>
 
+            {/* Dashboard
             <NavigationMenuItem>
-              <Link href="/dashboard-2" legacyBehavior passHref>
-                <NavigationMenuLink className="text-[15px] font-medium text-muted-foreground hover:text-primary cursor-pointer px-4">
-                  Dashboard 2
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuTrigger>Dashboard</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid w-full gap-1 p-2">
+                  <ListItem title="ติดตามคำสั่งจอง E-Booking" href="/dashboard" />
+                  <ListItem title="สถานะการจัดส่ง" href="/shipping" />
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem> */}
+
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/NongWangJai"
+                  className="h-10 px-4 py-2 text-[15px] font-medium text-pt-neutral-500 hover:text-pt-primary-600 transition-colors inline-flex items-center gap-2 cursor-pointer"
+                >
+                  AI Nong Wang Jai
+                  <span className="inline-flex items-center justify-center bg-pt-error-500 text-white text-[10px] font-bold w-4 h-4 rounded-full leading-none">
+                    2
+                  </span>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
       </div>
 
-      {/* ส่วน Action ขวามือ (เปิดใช้งานและใช้สีตาม Token) */}
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-4 border-r pr-6 border-border text-muted-foreground">
-          <Search
-            size={20}
-            className="cursor-pointer hover:text-primary transition-colors"
-          />
-          <div className="relative">
-            <Bell
-              size={20}
-              className="cursor-pointer hover:text-destructive transition-colors"
-            />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-destructive rounded-full border-2 border-background"></span>
-          </div>
+      {/* User Profile Section */}
+      <div className="flex items-center gap-3">
+        <div className="text-right hidden md:block">
+          <p className="text-[12px] font-bold text-pt-neutral-700">User Name</p>
+          <p className="text-[10px] text-pt-neutral-400">Admin</p>
         </div>
-
-        <div className="flex items-center gap-3 cursor-pointer group">
-          <div className="text-right hidden md:block leading-tight">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              Store Admin
-            </p>
-            <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-              Sasitorn
-            </p>
-          </div>
-          <div className="w-9 h-9 bg-secondary rounded-full flex items-center justify-center border border-border group-hover:border-primary transition-all">
-            <UserCircle
-              size={24}
-              className="text-muted-foreground group-hover:text-primary"
-            />
-          </div>
-          <ChevronDown size={14} className="text-muted-foreground" />
-        </div>
+        <div className="w-8 h-8 rounded-full bg-pt-neutral-100 border border-pt-neutral-200" />
       </div>
     </header>
   );
 }
 
-const ListItem = ({ title }: { title: string }) => (
-  <li className="border-b border-border last:border-0">
+const ListItem = ({ title, href }: { title: string; href: string }) => (
+  <li>
     <NavigationMenuLink asChild>
-      <div className="flex items-center justify-between px-5 py-4 hover:bg-accent cursor-pointer group transition-all">
-        <span className="text-[14px] font-semibold text-foreground group-hover:text-primary">
+      <Link
+        href={href}
+        className="block select-none space-y-1 rounded-md px-3 py-2.5 leading-none no-underline outline-none transition-colors hover:bg-pt-neutral-50 focus:bg-pt-neutral-50"
+      >
+        <div className="text-[14px] font-medium leading-tight text-pt-neutral-700 hover:text-pt-primary-600">
           {title}
-        </span>
-        <ChevronRight
-          size={14}
-          className="text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-1"
-        />
-      </div>
+        </div>
+      </Link>
     </NavigationMenuLink>
   </li>
 );

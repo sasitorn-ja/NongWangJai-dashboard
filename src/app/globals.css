@@ -4,102 +4,280 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-    /* Font Mapping */
-    --font-sans: var(--pt-font-sans);
-    --font-heading: var(--pt-font-sans);
-
-    /* Shadcn UI Mapping to Project Tokens */
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
-    --color-popover: var(--popover);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-destructive: var(--destructive);
-    --color-destructive-foreground: var(--destructive-foreground);
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
-
-    /* Custom Status Colors from Design Tokens */
-    --color-success: #10b981;
-    --color-success-foreground: #ffffff;
-    --color-warning: #f59e0b;
-    --color-warning-foreground: #ffffff;
-
-    /* Radius Scale ตามที่ทีมกำหนด (24px สำหรับ card) */
-    --radius-xl: 1.5rem;
-    --radius-lg: 1rem;
-    --radius-md: 0.75rem;
-    --radius-sm: 0.5rem;
-}
+/* ═══════════════════════════════════════════════════════════════
+   PROJECT TRACKING DESIGN TOKENS  (PROJECT_TRACKING_DESIGN_TOKENS.md)
+   ─── Foundation tokens → Semantic aliases → Tailwind mapping
+   ═══════════════════════════════════════════════════════════════ */
 
 :root {
-    /* Neutrals & Surfaces */
-    --background: #f8fafc; /* --pt-color-neutral-50 */
-    --foreground: #0f172a; /* --pt-color-neutral-900 */
-    --card: #ffffff;
-    --card-foreground: #334155; /* --pt-color-neutral-700 */
-    --popover: #ffffff;
-    --popover-foreground: #0f172a;
+  /* ── Brand / Primary (Blue) ─────────────────────────────── */
+  --pt-color-primary-50:  #eff6ff;
+  --pt-color-primary-100: #dbeafe;
+  --pt-color-primary-200: #bfdbfe;
+  --pt-color-primary-300: #93c5fd;
+  --pt-color-primary-400: #60a5fa;
+  --pt-color-primary-500: #3b82f6;
+  --pt-color-primary-600: #2563eb;
+  --pt-color-primary-700: #1d4ed8;
+  --pt-color-primary-800: #1e40af;
+  --pt-color-primary-900: #1e3a8a;
 
-    /* Brand Colors (CPAC Blue) */
-    --primary: #2563eb; /* --pt-color-primary-600 */
-    --primary-foreground: #ffffff;
-    --secondary: #f1f5f9; /* --pt-color-neutral-100 */
-    --secondary-foreground: #1d4ed8;
+  /* ── Secondary / Indigo ─────────────────────────────────── */
+  --pt-color-secondary-50:          #eef2ff;
+  --pt-color-secondary-100:         #e0e7ff;
+  --pt-color-secondary-600:         #4f46e5;
+  --pt-color-secondary-900:         #312e81;
+  --pt-color-secondary-dark-accent: #22d3ee;
 
-    /* Borders & Inputs */
-    --border: #e2e8f0; /* --pt-color-neutral-200 */
-    --input: #cbd5e1;  /* --pt-color-neutral-300 */
-    --ring: #3b82f6;
+  /* ── Success / Emerald ──────────────────────────────────── */
+  --pt-color-success-100: #d1fae5;
+  --pt-color-success-300: #6ee7b7;
+  --pt-color-success-500: #10b981;
+  --pt-color-success-600: #059669;
+  --pt-color-success-700: #047857;
+  --pt-color-success-900: #064e3b;
 
-    /* Feedback States */
-    --muted: #f1f5f9;
-    --muted-foreground: #64748b;
-    --accent: #eff6ff;
-    --accent-foreground: #2563eb;
-    --destructive: #f43f5e;
-    --destructive-foreground: #ffffff;
+  /* ── Warning / Amber ────────────────────────────────────── */
+  --pt-color-warning-100: #fef3c7;
+  --pt-color-warning-500: #f59e0b;
+  --pt-color-warning-600: #d97706;
 
-    /* Font Variable */
-    --pt-font-sans: "IBM Plex Sans Thai", "IBM Plex Sans", sans-serif;
+  /* ── Error / Rose ───────────────────────────────────────── */
+  --pt-color-error-50:  #fff1f2;
+  --pt-color-error-100: #ffe4e6;
+  --pt-color-error-200: #fecdd3;
+  --pt-color-error-500: #f43f5e;
+  --pt-color-error-600: #e11d48;
+  --pt-color-error-700: #be123c;
+  --pt-color-error-900: #881337;
 
-    /* Sidebar Context */
-    --sidebar: #ffffff;
-    --sidebar-foreground: #334155;
-    --sidebar-primary: #2563eb;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #f1f5f9;
-    --sidebar-accent-foreground: #2563eb;
-    --sidebar-border: #e2e8f0;
-    --sidebar-ring: #3b82f6;
+  /* ── Neutrals / Slate ───────────────────────────────────── */
+  --pt-color-neutral-0:   #ffffff;
+  --pt-color-neutral-50:  #f8fafc;
+  --pt-color-neutral-100: #f1f5f9;
+  --pt-color-neutral-200: #e2e8f0;
+  --pt-color-neutral-300: #cbd5e1;
+  --pt-color-neutral-400: #94a3b8;
+  --pt-color-neutral-500: #64748b;
+  --pt-color-neutral-600: #475569;
+  --pt-color-neutral-700: #334155;
+  --pt-color-neutral-800: #1e293b;
+  --pt-color-neutral-900: #0f172a;
+  --pt-color-neutral-950: #020617;
+
+  /* ── Semantic Surfaces ──────────────────────────────────── */
+  --pt-bg-page:           var(--pt-color-neutral-50);
+  --pt-bg-surface:        var(--pt-color-neutral-0);
+  --pt-bg-surface-muted:  var(--pt-color-neutral-100);
+  --pt-bg-surface-strong: var(--pt-color-neutral-900);
+  --pt-bg-overlay:        rgba(15, 23, 42, 0.72);
+
+  /* ── Borders ────────────────────────────────────────────── */
+  --pt-border-subtle:  var(--pt-color-neutral-200);
+  --pt-border-default: var(--pt-color-neutral-300);
+  --pt-border-strong:  var(--pt-color-neutral-700);
+
+  /* ── Text ───────────────────────────────────────────────── */
+  --pt-text-strong:  var(--pt-color-neutral-900);
+  --pt-text-default: var(--pt-color-neutral-700);
+  --pt-text-muted:   var(--pt-color-neutral-500);
+  --pt-text-inverse: #ffffff;
+
+  /* ── Interactive ────────────────────────────────────────── */
+  --pt-link:           var(--pt-color-primary-600);
+  --pt-link-hover:     var(--pt-color-primary-700);
+  --pt-focus-ring:     rgba(37, 99, 235, 0.18);
+  --pt-selection-bg:   #dbeafe;
+  --pt-selection-text: #1e3a8a;
+
+  /* ── Typography ─────────────────────────────────────────── */
+  --pt-font-sans:            "IBM Plex Sans Thai", "IBM Plex Sans", "Noto Sans Thai", "Segoe UI", sans-serif;
+  --pt-font-weight-regular:  400;
+  --pt-font-weight-medium:   500;
+  --pt-font-weight-semibold: 600;
+  --pt-font-weight-bold:     700;
+  --pt-text-2xs: 10px;
+  --pt-text-xs:  12px;
+  --pt-text-sm:  14px;
+  --pt-text-md:  16px;
+  --pt-text-lg:  18px;
+  --pt-text-xl:  20px;
+  --pt-text-2xl: 24px;
+  --pt-text-3xl: 30px;
+  --pt-line-height-tight:   1.2;
+  --pt-line-height-snug:    1.35;
+  --pt-line-height-normal:  1.5;
+  --pt-line-height-relaxed: 1.75;
+
+  /* ── Spacing (4px grid) ─────────────────────────────────── */
+  --pt-space-0:  0;
+  --pt-space-1:  4px;
+  --pt-space-2:  8px;
+  --pt-space-3:  12px;
+  --pt-space-4:  16px;
+  --pt-space-5:  20px;
+  --pt-space-6:  24px;
+  --pt-space-8:  32px;
+  --pt-space-10: 40px;
+  --pt-space-12: 48px;
+
+  /* ── Radius ─────────────────────────────────────────────── */
+  --pt-radius-sm:   8px;
+  --pt-radius-md:   12px;
+  --pt-radius-lg:   16px;
+  --pt-radius-xl:   24px;
+  --pt-radius-2xl:  32px;
+  --pt-radius-full: 9999px;
+
+  /* ── Shadows ────────────────────────────────────────────── */
+  --pt-shadow-xs:         0 1px 2px rgba(15, 23, 42, 0.06);
+  --pt-shadow-sm:         0 8px 20px rgba(15, 23, 42, 0.06);
+  --pt-shadow-md:         0 18px 40px rgba(15, 23, 42, 0.06);
+  --pt-shadow-lg:         0 18px 55px rgba(15, 23, 42, 0.08);
+  --pt-shadow-xl-dark:    0 24px 70px rgba(2, 6, 23, 0.55);
+  --pt-shadow-inset-soft: inset 0 0 0 1px rgba(37, 99, 235, 0.08);
+
+  /* ── Semantic Component Aliases ─────────────────────────── */
+  --pt-button-primary-bg:        var(--pt-color-neutral-900);
+  --pt-button-primary-bg-hover:  var(--pt-color-neutral-800);
+  --pt-button-primary-text:      #ffffff;
+  --pt-button-secondary-bg:      var(--pt-color-neutral-0);
+  --pt-button-secondary-border:  var(--pt-color-neutral-200);
+  --pt-button-secondary-text:    var(--pt-color-neutral-700);
+  --pt-input-bg:                 var(--pt-bg-surface);
+  --pt-input-border:             var(--pt-border-default);
+  --pt-input-border-focus:       var(--pt-color-primary-500);
+  --pt-input-placeholder:        var(--pt-color-neutral-400);
+  --pt-card-bg:                  var(--pt-bg-surface);
+  --pt-card-border:              var(--pt-border-subtle);
+  --pt-card-shadow:              var(--pt-shadow-sm);
+  --pt-table-header-bg:          var(--pt-bg-surface-muted);
+  --pt-focus-outline:            0 0 0 4px var(--pt-focus-ring);
 }
 
+/* ── Dark Mode overrides ────────────────────────────────────── */
 .dark {
-    --background: #020617;
-    --foreground: #f8fafc;
-    --card: #0f172a;
-    --card-foreground: #f8fafc;
-    --primary: #3b82f6;
-    --border: #1e293b;
-    --input: #1e293b;
+  --pt-bg-page:           var(--pt-color-neutral-950);
+  --pt-bg-surface:        var(--pt-color-neutral-900);
+  --pt-bg-surface-muted:  var(--pt-color-neutral-800);
+  --pt-bg-surface-strong: var(--pt-color-secondary-dark-accent);
+  --pt-bg-overlay:        rgba(2, 6, 23, 0.82);
+
+  --pt-border-subtle:  var(--pt-color-neutral-800);
+  --pt-border-default: var(--pt-color-neutral-700);
+  --pt-border-strong:  var(--pt-color-neutral-300);
+
+  --pt-text-strong:  #f8fafc;
+  --pt-text-default: #cbd5e1;
+  --pt-text-muted:   #94a3b8;
+  --pt-text-inverse: #020617;
+
+  --pt-link:           #60a5fa;
+  --pt-link-hover:     #67e8f9;
+  --pt-focus-ring:     rgba(34, 211, 238, 0.22);
+  --pt-selection-bg:   rgba(30, 58, 138, 0.8);
+  --pt-selection-text: #dbeafe;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   TAILWIND @theme — maps --pt-* → Tailwind utility classes
+   ═══════════════════════════════════════════════════════════════ */
+
+@theme inline {
+  /* Font */
+  --font-sans:    var(--pt-font-sans);
+  --font-heading: var(--pt-font-sans);
+
+  /* Shadcn semantic tokens → pt foundation tokens */
+  --color-background:             var(--pt-bg-page);
+  --color-foreground:             var(--pt-text-strong);
+  --color-card:                   var(--pt-bg-surface);
+  --color-card-foreground:        var(--pt-text-default);
+  --color-popover:                var(--pt-bg-surface);
+  --color-popover-foreground:     var(--pt-text-strong);
+  --color-primary:                var(--pt-color-primary-600);
+  --color-primary-foreground:     var(--pt-text-inverse);
+  --color-secondary:              var(--pt-bg-surface-muted);
+  --color-secondary-foreground:   var(--pt-color-primary-700);
+  --color-muted:                  var(--pt-bg-surface-muted);
+  --color-muted-foreground:       var(--pt-text-muted);
+  --color-accent:                 var(--pt-color-primary-50);
+  --color-accent-foreground:      var(--pt-color-primary-600);
+  --color-destructive:            var(--pt-color-error-500);
+  --color-destructive-foreground: var(--pt-text-inverse);
+  --color-border:                 var(--pt-border-subtle);
+  --color-input:                  var(--pt-border-default);
+  --color-ring:                   var(--pt-color-primary-500);
+
+  /* Status colors */
+  --color-success:             var(--pt-color-success-600);
+  --color-success-foreground:  var(--pt-text-inverse);
+  --color-warning:             var(--pt-color-warning-500);
+  --color-warning-foreground:  var(--pt-text-inverse);
+
+  /* Expose pt-color-* palette as Tailwind color utilities */
+  --color-pt-primary-50:            var(--pt-color-primary-50);
+  --color-pt-primary-100:           var(--pt-color-primary-100);
+  --color-pt-primary-300:           var(--pt-color-primary-300);
+  --color-pt-primary-600:           var(--pt-color-primary-600);
+  --color-pt-primary-700:           var(--pt-color-primary-700);
+  --color-pt-primary-900:           var(--pt-color-primary-900);
+  --color-pt-success-100:           var(--pt-color-success-100);
+  --color-pt-success-300:           var(--pt-color-success-300);
+  --color-pt-success-600:           var(--pt-color-success-600);
+  --color-pt-success-700:           var(--pt-color-success-700);
+  --color-pt-warning-100:           var(--pt-color-warning-100);
+  --color-pt-warning-500:           var(--pt-color-warning-500);
+  --color-pt-warning-600:           var(--pt-color-warning-600);
+  --color-pt-error-50:              var(--pt-color-error-50);
+  --color-pt-error-100:             var(--pt-color-error-100);
+  --color-pt-error-200:             var(--pt-color-error-200);
+  --color-pt-error-600:             var(--pt-color-error-600);
+  --color-pt-error-700:             var(--pt-color-error-700);
+  --color-pt-neutral-50:            var(--pt-color-neutral-50);
+  --color-pt-neutral-100:           var(--pt-color-neutral-100);
+  --color-pt-neutral-200:           var(--pt-color-neutral-200);
+  --color-pt-neutral-400:           var(--pt-color-neutral-400);
+  --color-pt-neutral-500:           var(--pt-color-neutral-500);
+  --color-pt-neutral-600:           var(--pt-color-neutral-600);
+  --color-pt-neutral-700:           var(--pt-color-neutral-700);
+  --color-pt-neutral-900:           var(--pt-color-neutral-900);
+  --color-pt-secondary-dark-accent: var(--pt-color-secondary-dark-accent);
+
+  /* Radius scale */
+  --radius-sm:   var(--pt-radius-sm);
+  --radius-md:   var(--pt-radius-md);
+  --radius-lg:   var(--pt-radius-lg);
+  --radius-xl:   var(--pt-radius-xl);
+  --radius-2xl:  var(--pt-radius-2xl);
+  --radius-full: var(--pt-radius-full);
+
+  /* Sidebar */
+  --color-sidebar:                    var(--pt-bg-surface);
+  --color-sidebar-foreground:         var(--pt-text-default);
+  --color-sidebar-primary:            var(--pt-color-primary-600);
+  --color-sidebar-primary-foreground: var(--pt-text-inverse);
+  --color-sidebar-accent:             var(--pt-bg-surface-muted);
+  --color-sidebar-accent-foreground:  var(--pt-color-primary-600);
+  --color-sidebar-border:             var(--pt-border-subtle);
+  --color-sidebar-ring:               var(--pt-color-primary-500);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE LAYER
+   ═══════════════════════════════════════════════════════════════ */
 
 @layer base {
-    * {
-        @apply border-border outline-ring/50;
-    }
-    body {
-        @apply bg-background text-foreground font-sans antialiased;
-    }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: var(--pt-text-sm);
+    line-height: var(--pt-line-height-normal);
+  }
+  ::selection {
+    background-color: var(--pt-selection-bg);
+    color: var(--pt-selection-text);
+  }
 }
