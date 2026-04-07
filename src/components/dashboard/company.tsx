@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Download, History, Search, X } from "lucide-react";
+import { Download, Search, X } from "lucide-react";
 
 import { DashboardService } from "@/services/dashboard";
 import {
   CustomerGroup,
   DealerGroup,
-  DPStatusType,
   OrderDetail,
-  OrderStatusType,
   SiteDetail,
 } from "@/types/dashboard";
 
@@ -21,7 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,68 +37,33 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+
+// ── shared Dialog + sub-components ──────────────────────────────────────────
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  OrderDetailDialog,
+  DialogOrderRow,
+  StatusBadge,
+  DPBadge,
+  MiniProgress,
+  ORDER_STYLE,
+  DP_STYLE,
+  sumDelivered,
+  progress,
+} from "@/components/dashboard/order-detail-dialog";
 
 const PAGE_SIZE = 10;
 
 const HEADERS = [
-  ["เวลา Update", "w-[86px]"],
-  ["Dealer", "w-[160px]"],
-  ["ลูกค้า / ผู้รับเหมา", "w-[210px]"],
-  ["Site code", "w-[140px]"],
-  ["รายการสั่งคอนกรีต", "w-[190px]"],
-  ["ปริมาณสั่ง", "w-[88px] text-right"],
-  ["ส่งแล้ว", "w-[88px] text-right"],
-  ["คงเหลือ", "w-[88px] text-right"],
-  ["วัน/เวลาเท", "w-[104px] text-center"],
-  ["สถานะคำสั่ง", "w-[128px]"],
-  ["สถานะ DP", "w-[112px]"],
-  ["ดูประวัติ", "w-[96px] text-center"],
+  ["เวลา / Dealer", "w-[130px]"],
+  ["ลูกค้า / ผู้รับเหมา", ""],
+  ["Site", "w-[130px]"],
+  ["รายการสั่ง", "w-[160px]"],
+  ["ปริมาณ / ส่งแล้ว", "w-[110px] text-right"],
+  ["คงเหลือ", "w-[80px] text-right"],
+  ["วัน/เวลาเท", "w-[100px] text-center"],
+  ["สถานะ", "w-[240px]"],
+  ["", "w-[90px] text-center"],
 ] as const;
-
-const ORDER_STYLE: Record<
-  OrderStatusType,
-  { badge: string; dot: string; bar: string }
-> = {
-  อยู่ระหว่างจัดส่ง: {
-    badge: "bg-pt-primary-100 text-pt-primary-700 border-pt-primary-300",
-    dot: "bg-pt-primary-600 animate-pulse",
-    bar: "bg-pt-primary-600",
-  },
-  ดำเนินการครบถ้วน: {
-    badge: "bg-pt-success-100 text-pt-success-700 border-pt-success-300",
-    dot: "bg-pt-success-600",
-    bar: "bg-pt-success-600",
-  },
-  รอดำเนินการ: {
-    badge: "bg-pt-warning-100 text-pt-warning-600 border-pt-warning-500",
-    dot: "bg-pt-warning-500",
-    bar: "bg-pt-neutral-400",
-  },
-  ยกเลิกรายการ: {
-    badge: "bg-pt-error-100 text-pt-error-700 border-pt-error-200",
-    dot: "bg-pt-error-600",
-    bar: "bg-pt-error-200",
-  },
-  "รอ Site code": {
-    badge: "bg-pt-neutral-100 text-pt-neutral-600 border-pt-neutral-300",
-    dot: "bg-pt-neutral-400",
-    bar: "bg-pt-neutral-200",
-  },
-};
-
-const DP_STYLE: Record<DPStatusType, string> = {
-  "DP ครบ": "bg-pt-success-100 text-pt-success-700 border-pt-success-300",
-  "DP เปิดแล้ว": "bg-pt-primary-100 text-pt-primary-700 border-pt-primary-300",
-  "รอเปิด DP": "bg-pt-warning-100 text-pt-warning-600 border-pt-warning-500",
-  รอปริมาณรวม: "bg-pt-neutral-100 text-pt-neutral-600 border-pt-neutral-300",
-};
 
 const STATUS_OPTIONS = [
   "ALL",
@@ -121,12 +83,6 @@ const DP_OPTIONS = [
 ] as const;
 
 const pad = (n: number) => `${n}`.padStart(2, "0");
-
-const sumDelivered = (o: OrderDetail) =>
-  o.deliveries.reduce((sum, d) => sum + d.qty, 0);
-
-const progress = (sent: number, total: number) =>
-  total > 0 ? Math.round((sent / total) * 100) : 0;
 
 const formatNow = (date: Date) =>
   `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(
@@ -155,61 +111,6 @@ function getPaginationRange(current: number, total: number): (number | "...")[] 
   if (current <= 4) return [1, 2, 3, 4, 5, "...", total];
   if (current >= total - 3) return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
   return [1, "...", current - 1, current, current + 1, "...", total];
-}
-
-function StatusBadge({ status }: { status: OrderStatusType }) {
-  const s = ORDER_STYLE[status];
-  return (
-    <Badge
-      variant="outline"
-      className={`text-[10px] font-bold gap-1.5 rounded-[8px] uppercase tracking-wide ${s.badge}`}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`} />
-      {status}
-    </Badge>
-  );
-}
-
-function DPBadge({ status, plant }: { status: DPStatusType; plant: string }) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <Badge
-        variant="outline"
-        className={`text-[10px] font-bold w-fit rounded-[8px] uppercase tracking-wide ${DP_STYLE[status]}`}
-      >
-        {status}
-      </Badge>
-      {!!plant && (
-        <span className="text-[10px] text-pt-neutral-500 font-mono pl-0.5">
-          {plant}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function MiniProgress({
-  sent,
-  total,
-  status,
-}: {
-  sent: number;
-  total: number;
-  status: OrderStatusType;
-}) {
-  const pct = progress(sent, total);
-
-  return (
-    <>
-      <div className="w-full bg-pt-neutral-100 rounded-full h-1.5 mt-1 overflow-hidden">
-        <div
-          className={`${ORDER_STYLE[status].bar} h-full rounded-full`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <p className="text-[10px] text-pt-neutral-500 mt-0.5 text-right">{pct}%</p>
-    </>
-  );
 }
 
 function StatCard({
@@ -337,233 +238,116 @@ function DealerMultiSelect({
   );
 }
 
-type FlatOrderRow = {
+// FlatOrderRow สำหรับ company — ใช้ DialogOrderRow จาก shared file โดยตรง
+// dealerId / dealerName เป็น required ในหน้านี้
+type FlatOrderRow = DialogOrderRow & {
   dealerId: string;
   dealerName: string;
-  customer: CustomerGroup;
-  site: SiteDetail;
-  order: OrderDetail;
 };
-
-type DeliveryHistoryDialogProps = {
-  row: FlatOrderRow | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-};
-
-function DeliveryHistoryDialog({
-  row,
-  open,
-  onOpenChange,
-}: DeliveryHistoryDialogProps) {
-  if (!row) return null;
-
-  const sent = sumDelivered(row.order);
-  const rem = Math.max(row.order.totalQty - sent, 0);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>ประวัติการจัดส่ง</DialogTitle>
-          <DialogDescription>
-            {row.order.orderId} · {row.order.product}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="rounded-xl border border-pt-neutral-200 p-3">
-            <p className="text-[10px] uppercase text-pt-neutral-500 font-bold">Dealer</p>
-            <p className="text-[13px] font-semibold text-pt-neutral-900 mt-1">{row.dealerName}</p>
-            <p className="text-[11px] text-pt-neutral-500">{row.dealerId}</p>
-          </div>
-
-          <div className="rounded-xl border border-pt-neutral-200 p-3">
-            <p className="text-[10px] uppercase text-pt-neutral-500 font-bold">ลูกค้า</p>
-            <p className="text-[13px] font-semibold text-pt-neutral-900 mt-1">
-              {row.customer.companyName}
-            </p>
-            <p className="text-[11px] text-pt-neutral-500">{row.customer.phone}</p>
-          </div>
-
-          <div className="rounded-xl border border-pt-neutral-200 p-3">
-            <p className="text-[10px] uppercase text-pt-neutral-500 font-bold">Site</p>
-            <p className="text-[13px] font-semibold text-pt-neutral-900 mt-1">
-              {row.site.siteCode}
-            </p>
-            <p className="text-[11px] text-pt-neutral-500">{row.site.siteName}</p>
-          </div>
-
-          <div className="rounded-xl border border-pt-neutral-200 p-3">
-            <p className="text-[10px] uppercase text-pt-neutral-500 font-bold">ความคืบหน้า</p>
-            <p className="text-[13px] font-semibold text-pt-neutral-900 mt-1">
-              {progress(sent, row.order.totalQty)}%
-            </p>
-            <p className="text-[11px] text-pt-neutral-500">
-              ส่งแล้ว {sent.toLocaleString()} / คงเหลือ {rem.toLocaleString()}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-pt-neutral-200 overflow-hidden">
-          <div className="px-4 py-3 bg-pt-neutral-50 border-b border-pt-neutral-200">
-            <p className="text-[12px] font-semibold text-pt-neutral-900">
-              รายการรอบจัดส่ง {row.order.deliveries.length} รอบ
-            </p>
-          </div>
-
-          <div className="max-h-[380px] overflow-auto">
-            {row.order.deliveries.length > 0 ? (
-              <div className="divide-y divide-pt-neutral-200">
-                {row.order.deliveries.map((d, i) => (
-                  <div key={i} className="px-4 py-3 grid grid-cols-12 gap-3 items-center">
-                    <div className="col-span-2">
-                      <p className="text-[12px] font-mono text-pt-neutral-900">{d.date}</p>
-                      <p className="text-[11px] font-mono text-pt-neutral-500">{d.time}</p>
-                    </div>
-                    <div className="col-span-5">
-                      <p className="text-[12px] text-pt-neutral-900">{d.note}</p>
-                    </div>
-                    <div className="col-span-2 text-[12px] text-pt-neutral-500">{d.truck}</div>
-                    <div className="col-span-3 text-right">
-                      <p className="text-[13px] font-semibold text-pt-primary-600 font-mono">
-                        {d.qty.toLocaleString()} คิว
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="px-4 py-8 text-center text-[12px] text-pt-neutral-500">
-                ไม่มีประวัติการจัดส่ง
-              </div>
-            )}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 function FlatOrderTableRow({
   row,
-  onOpenHistory,
+  onOpenDetail,
 }: {
   row: FlatOrderRow;
-  onOpenHistory: (row: FlatOrderRow) => void;
+  onOpenDetail: (row: FlatOrderRow) => void;
 }) {
   const sent = sumDelivered(row.order);
   const rem = Math.max(row.order.totalQty - sent, 0);
 
   return (
-    <TableRow className="hover:bg-pt-neutral-50 transition-colors border-b border-pt-neutral-200">
-      <TableCell className="w-[86px]">
+    <TableRow className="hover:bg-pt-neutral-50 transition-colors border-b border-pt-neutral-100">
+      {/* เวลา + Dealer */}
+      <TableCell className="w-[130px] py-3">
         {row.order.updateTime && row.order.updateTime !== "-" ? (
-          <span className="font-mono text-[12px] font-medium text-pt-neutral-700 flex items-center gap-1">
+          <span className="font-mono text-[11px] font-medium text-pt-neutral-700 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-pt-success-500 animate-pulse shrink-0" />
             {row.order.updateTime}
           </span>
         ) : (
           <span className="text-pt-neutral-400 text-[11px]">—</span>
         )}
-      </TableCell>
-
-      <TableCell className="w-[160px] min-w-[160px]">
-        <p className="font-semibold text-[12px] text-pt-neutral-900 leading-tight">
+        <p className="font-semibold text-[11px] text-pt-neutral-800 leading-tight mt-1 truncate max-w-[120px]">
           {row.dealerName}
         </p>
-        <p className="text-[10px] text-pt-neutral-500 font-mono mt-0.5">
-          {row.dealerId}
-        </p>
+        <p className="text-[10px] text-pt-neutral-400 font-mono">{row.dealerId}</p>
       </TableCell>
 
-      <TableCell className="w-[210px] min-w-[210px]">
-        <p className="font-semibold text-[13px] text-pt-neutral-900 leading-tight">
+      {/* ลูกค้า */}
+      <TableCell className="py-3">
+        <p className="font-semibold text-[12px] text-pt-neutral-900 leading-tight">
           {row.customer.companyName}
         </p>
         <p className="text-[11px] text-pt-neutral-500 mt-0.5">
           {row.customer.id} · {row.customer.phone}
         </p>
-        <p className="text-[11px] text-pt-neutral-500 mt-0.5">
-          Line: {row.customer.contactLine}
-        </p>
+        <p className="text-[11px] text-pt-neutral-400">Line: {row.customer.contactLine}</p>
       </TableCell>
 
-      <TableCell className="w-[140px] min-w-[140px]">
+      {/* Site */}
+      <TableCell className="w-[130px] py-3">
         <p className="font-mono font-semibold text-[12px] text-pt-primary-700">
           {row.site.siteCode}
         </p>
-        <p className="text-[11px] text-pt-neutral-500 mt-1 leading-tight">
+        <p className="text-[11px] text-pt-neutral-500 mt-0.5 leading-tight line-clamp-2">
           {row.site.siteName}
         </p>
       </TableCell>
 
-      <TableCell className="w-[190px]">
-        <p className="font-semibold text-[12px] text-pt-neutral-700">{row.order.product}</p>
-        <p className="text-[11px] text-pt-neutral-500 leading-tight">{row.order.spec}</p>
+      {/* รายการสั่ง */}
+      <TableCell className="w-[160px] py-3">
+        <p className="font-semibold text-[11px] text-pt-neutral-700 line-clamp-2">{row.order.product}</p>
         <p className="text-[10px] font-mono text-pt-neutral-400 mt-0.5">{row.order.orderId}</p>
       </TableCell>
 
-      <TableCell className="text-right w-[88px]">
-        <span className="font-mono font-semibold text-[13px] text-pt-neutral-700">
+      {/* ปริมาณ / ส่งแล้ว */}
+      <TableCell className="w-[110px] text-right py-3">
+        <p className="font-mono font-semibold text-[12px] text-pt-neutral-700">
           {row.order.totalQty.toLocaleString()}
-        </span>
-        <p className="text-[10px] text-pt-neutral-500">คิว</p>
-      </TableCell>
-
-      <TableCell className="text-right w-[88px]">
-        <span
-          className={`font-mono font-semibold text-[13px] ${
-            sent > 0 ? "text-pt-primary-600" : "text-pt-neutral-400"
-          }`}
-        >
+          <span className="text-[10px] text-pt-neutral-400 ml-0.5">จำนวนคิวทั้งหมด</span>
+        </p>
+        <p className={`font-mono text-[12px] font-semibold mt-0.5 ${sent > 0 ? "text-pt-primary-600" : "text-pt-neutral-300"}`}>
           {sent.toLocaleString()}
-        </span>
+          <span className="text-[10px] text-pt-neutral-400 ml-0.5">จำนวนส่ง</span>
+        </p>
         <MiniProgress sent={sent} total={row.order.totalQty} status={row.order.status} />
       </TableCell>
 
-      <TableCell className="text-right w-[88px]">
-        <span
-          className={`font-mono font-semibold text-[13px] ${
-            rem === 0
-              ? "text-pt-success-600"
-              : row.order.status === "ยกเลิกรายการ"
-                ? "text-pt-neutral-400 line-through"
-                : "text-pt-neutral-900"
-          }`}
-        >
+      {/* คงเหลือ */}
+      <TableCell className="w-[80px] text-right py-3">
+        <span className={`font-mono font-semibold text-[13px] ${
+          rem === 0 ? "text-pt-success-600"
+          : row.order.status === "ยกเลิกรายการ" ? "text-pt-neutral-400 line-through"
+          : "text-pt-neutral-900"
+        }`}>
           {rem.toLocaleString()}
         </span>
-        <p className="text-[10px] text-pt-neutral-500">คิว</p>
+        <p className="text-[10px] text-pt-neutral-400">คิว</p>
       </TableCell>
 
-      <TableCell className="text-center w-[104px]">
-        <p className="text-[12px] font-medium text-pt-neutral-700">
-          {row.order.schedDate || "—"}
-        </p>
-        {!!row.order.schedTime && (
-          <p className="text-[11px] font-mono text-pt-neutral-500">
-            {row.order.schedTime}
-          </p>
-        )}
+      {/* วัน/เวลาเท */}
+      <TableCell className="w-[100px] text-center py-3">
+        <p className="text-[11px] font-medium text-pt-neutral-700">{row.order.schedDate || "—"}</p>
+        <p className="text-[10px] font-mono text-pt-neutral-500 mt-0.5">{row.order.schedTime || "-"}</p>
       </TableCell>
 
-      <TableCell className="w-[128px]">
-        <StatusBadge status={row.order.status} />
+      {/* สถานะ (คำสั่ง + DP รวมกัน) */}
+      <TableCell className="w-[240px] py-3">
+        <div className="flex flex-wrap gap-1">
+          <StatusBadge status={row.order.status} />
+          <DPBadge status={row.order.dpStatus} plant={row.order.dpPlant} />
+        </div>
       </TableCell>
 
-      <TableCell className="w-[112px]">
-        <DPBadge status={row.order.dpStatus} plant={row.order.dpPlant} />
-      </TableCell>
-
-      <TableCell className="w-[96px] text-center">
+      {/* ปุ่ม */}
+      <TableCell className="w-[90px] text-center py-3">
         <Button
           size="sm"
           variant="outline"
-          className="h-8 rounded-[12px] text-[11px]"
-          onClick={() => onOpenHistory(row)}
+          className="h-7 px-3 rounded-[10px] text-[11px] border-pt-neutral-300 hover:bg-pt-primary-50 hover:border-pt-primary-400 hover:text-pt-primary-700"
+          onClick={() => onOpenDetail(row)}
         >
-          ดูประวัติ
+          ดูรายละเอียด
         </Button>
       </TableCell>
     </TableRow>
@@ -595,8 +379,8 @@ export default function CompanyDashboard() {
   const [filters, setFilters] = useState(draft);
   const [page, setPage] = useState(1);
   const [dateTimeNow, setDateTimeNow] = useState(formatNow(new Date()));
-  const [historyRow, setHistoryRow] = useState<FlatOrderRow | null>(null);
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [detailRow, setDetailRow] = useState<FlatOrderRow | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setDateTimeNow(formatNow(new Date())), 1000);
@@ -726,9 +510,9 @@ export default function CompanyDashboard() {
     setFilters(empty);
   };
 
-  const openHistory = (row: FlatOrderRow) => {
-    setHistoryRow(row);
-    setHistoryOpen(true);
+  const openDetail = (row: FlatOrderRow) => {
+    setDetailRow(row);
+    setDetailOpen(true);
   };
 
   return (
@@ -740,11 +524,8 @@ export default function CompanyDashboard() {
         <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
           <div>
             <h1 className="text-[18px] font-bold text-pt-neutral-900 leading-tight">
-              Dashboard บริษัท
+              Dashboard ติดตามคำสั่งจอง EBooking — งานจองคอนกรีต (Company)
             </h1>
-            <p className="text-[12px] text-pt-neutral-500 mt-0.5">
-              ติดตามคำสั่งจอง EBooking — งานจองคอนกรีต
-            </p>
             <p className="text-[12px] text-pt-neutral-500 mt-0.5">
               อัปเดตล่าสุด {dateTimeNow}
             </p>
@@ -783,7 +564,7 @@ export default function CompanyDashboard() {
             label="จำนวนคำสั่งจอง"
             value={String(totalOrders)}
             sub="รายการ"
-            accentClass="border-l-pt-error-600"
+            accentClass="border-l-pt-neutral-700"
           />
           <StatCard
             label="คำสั่งที่ต้องติดตาม"
@@ -795,7 +576,7 @@ export default function CompanyDashboard() {
             label="คำสั่งที่มีปัญหา"
             value={String(flatRows.filter((r) => r.order.status === "ยกเลิกรายการ").length)}
             sub="รายการ"
-            accentClass="border-l-pt-neutral-700"
+            accentClass="border-l-pt-error-600"
           />
         </div>
       </div>
@@ -949,12 +730,12 @@ export default function CompanyDashboard() {
               )}
             </p>
             <p className="text-[10px] text-pt-neutral-400">
-              ▸ กด “ดูประวัติ” เพื่อเปิดรายละเอียดการจัดส่ง
+              ▸ กด “รายละเอียด” เพื่อดูข้อมูลลูกค้า, site, DP และประวัติการจัดส่ง
             </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <Table className="table-fixed min-w-[1600px]">
+          <div>
+            <Table className="table-auto w-full">
               <TableHeader>
                 <TableRow className="bg-pt-neutral-100 hover:bg-pt-neutral-100 border-b-2 border-pt-neutral-200">
                   {HEADERS.map(([label, cls]) => (
@@ -974,7 +755,7 @@ export default function CompanyDashboard() {
                     <FlatOrderTableRow
                       key={`${row.dealerId}-${row.customer.id}-${row.site.siteCode}-${row.order.orderId}`}
                       row={row}
-                      onOpenHistory={openHistory}
+                      onOpenDetail={openDetail}
                     />
                   ))
                 ) : (
@@ -1041,10 +822,10 @@ export default function CompanyDashboard() {
         </div>
       </div>
 
-      <DeliveryHistoryDialog
-        row={historyRow}
-        open={historyOpen}
-        onOpenChange={setHistoryOpen}
+      <OrderDetailDialog
+        row={detailRow}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
       />
     </div>
   );

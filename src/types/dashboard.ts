@@ -32,6 +32,21 @@ export interface OrderDetail {
   schedTime: string;
   truck: string;
   updateTime: string;
+
+  /** richer DB detail */
+  dispatchCode?: string;
+  plantId?: string;
+  dealerCode?: string;
+  customerName?: string;
+  subCustomerName?: string;
+  siteCode?: string;
+  siteName?: string;
+  siteLocation?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  currentStatusRaw?: string | number | null;
+  memo?: string;
+  internalNote?: string;
 }
 
 export interface SiteDetail {
@@ -121,9 +136,67 @@ export interface QORaw {
   dispatchNo: string | null;
 }
 
-/** optional raw queue join */
+/** DB raw: tbt_order_so */
+export interface SORaw {
+  so_id: number;
+  project_id?: number | null;
+  qo_id?: number | null;
+  truck_queue_id?: number | null;
+  SaleOrderID?: string | null;
+  TempSaleOrderID?: string | null;
+  SaleOrderNum?: number | null;
+  DispatchCode?: string | null;
+  PlantID?: string | null;
+  ShipToCompCode?: string | null;
+  ShipToCode?: string | null;
+  ShipToName?: string | null;
+  ShipToLat?: string | null;
+  ShipToLng?: string | null;
+  SoldToCode?: string | null;
+  SoldToName?: string | null;
+  SoldToMobile?: string | null;
+  SoldToTelephone?: string | null;
+  SoldToSaleType?: string | null;
+  SubSoldToCode?: string | null;
+  SubSoldToName?: string | null;
+  SubSoldToMobile?: string | null;
+  SubSoldToTelephone?: string | null;
+  InitialOrderQuantity?: number | null;
+  CurrentOrderQuantity?: number | null;
+  ApproveOrderQuantity?: number | null;
+  CurrentStatus?: string | null;
+  BookByName?: string | null;
+  BookByPhoneNumber?: string | null;
+  DocumentDate?: string | null;
+  DeliveryDateTime?: string | null;
+  TruckType?: string | null;
+  TruckService?: string | null;
+  UnloadID?: string | null;
+  UnloadMethod?: string | null;
+  UnloadTimeDurationPerTruck?: string | null;
+  Memo?: string | null;
+  InternalNote?: string | null;
+  TransportRateQuantity?: number | null;
+  TransportRateTime?: number | null;
+  RequestQcSamplingConcrete?: string | null;
+  RequestQcServiceOnSite?: string | null;
+  QcPersonNumber?: string | null;
+  FranchiseeCode?: string | null;
+  MaterialCode?: string | null;
+  MaterialDescription?: string | null;
+  CompGroup?: string | null;
+  SaleOrderType?: string | null;
+  StructureID?: string | null;
+  StructureName?: string | null;
+  groupline_id?: number | null;
+  created_at?: string | null;
+  modify_at?: string | null;
+}
+
+/** raw queue / dp / trip */
 export interface QueueDeliveryRaw {
-  qo_id: number;
+  qo_id?: number | null;
+  so_id?: number | null;
   truck_queue_id: number;
   truck_queue_detail_id?: number | null;
   date_booking: string | null;
@@ -132,22 +205,63 @@ export interface QueueDeliveryRaw {
   no_truck?: number | null;
   remark_dp?: string | null;
   queue_status_id?: number | null;
+  leaves_time?: string | null;
+  arrived_time?: string | null;
+  price_cude?: number | null;
+  margin?: number | null;
+  net_price?: number | null;
+  total_price?: number | null;
 }
 
-/** UI grouping raw */
-export interface DashboardQORow extends QORaw {
-  customer_id?: string | null;
-  company_name?: string | null;
-  contact_person?: string | null;
-  contact_line?: string | null;
-  phone?: string | null;
+/**
+ * Unified dashboard raw row.
+ * ตัด key ซ้ำจาก QORaw ก่อน แล้วค่อยรวม SORaw
+ */
+export type DashboardQORow =
+  Omit<Partial<QORaw>, keyof SORaw> &
+  Partial<SORaw> & {
+    /** customer */
+    customer_id?: string | null;
+    company_name?: string | null;
+    contact_person?: string | null;
+    contact_line?: string | null;
+    phone?: string | null;
 
-  site_code?: string | null;
-  site_name?: string | null;
-  site_location?: string | null;
+    /** sub customer / contractor */
+    sub_customer_id?: string | null;
+    sub_company_name?: string | null;
+    sub_phone?: string | null;
 
-  dealer_id?: string | null;
-  dealer_name?: string | null;
+    /** site */
+    site_id?: number | null;
+    site_code?: string | null;
+    site_name?: string | null;
+    site_location?: string | null;
+    site_lat_lng?: string | null;
+    site_link_map?: string | null;
 
-  deliveries?: QueueDeliveryRaw[];
-}
+    /** dealer */
+    dealer_id?: string | null;
+    dealer_name?: string | null;
+    dealer_code?: string | null;
+
+    /** plant / dispatch */
+    dispatch_code?: string | null;
+    plant_id?: string | null;
+    plant_name?: string | null;
+
+    /** richer order fields */
+    delivery_datetime?: string | null;
+    material_description?: string | null;
+    current_status?: string | null;
+    contract_person?: string | null;
+    contract_phone?: string | null;
+    memo?: string | null;
+    internal_note?: string | null;
+    initial_order_quantity?: number | null;
+    current_order_quantity?: number | null;
+    approve_order_quantity?: number | null;
+
+    /** joined queue */
+    deliveries?: QueueDeliveryRaw[];
+  };
